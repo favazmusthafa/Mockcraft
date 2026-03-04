@@ -3,7 +3,6 @@
 > **The smartest local mock server ever built** — AI-powered fixtures, proxy recording, and a beautiful inspector UI. Zero config, instant start.
 
 [![CI](https://github.com/favazmusthafa/Mockcraft/actions/workflows/ci.yml/badge.svg)](https://github.com/favazmusthafa/Mockcraft/actions)
-[![npm](https://img.shields.io/npm/v/mockcraft)](https://www.npmjs.com/package/mockcraft)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node 18+](https://img.shields.io/badge/node-18%2B-brightgreen)](https://nodejs.org)
 
