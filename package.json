@@ -1,0 +1,69 @@
+{
+  "name": "mockcraft",
+  "version": "0.1.0",
+  "description": "The smartest local mock server — AI-powered fixtures, proxy recording, and a beautiful inspector UI.",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "bin": {
+    "mockcraft": "./dist/cli.js"
+  },
+  "main": "./dist/server.js",
+  "types": "./dist/server.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/server.js",
+      "types": "./dist/server.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "ui-dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:ui": "cd ui && npm run build",
+    "build:all": "npm run build && npm run build:ui",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build:all",
+    "start": "node dist/cli.js"
+  },
+  "keywords": [
+    "mock",
+    "mock-server",
+    "api",
+    "fixtures",
+    "proxy",
+    "ai",
+    "ollama",
+    "openapi",
+    "developer-tools",
+    "testing"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/mockcraft"
+  },
+  "dependencies": {
+    "hono": "^4.6.0",
+    "@hono/node-server": "^1.13.0",
+    "commander": "^12.1.0",
+    "ws": "^8.18.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.5.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.0",
+    "happy-dom": "^15.0.0"
+  }
+}
