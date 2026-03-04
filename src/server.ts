@@ -22,6 +22,7 @@ import {
     isAllowedOrigin,
     MAX_BODY_SIZE,
     safeLog,
+    safeError,
 } from './security.js';
 
 // ─────────────────────────────────────────────────────────────
@@ -291,7 +292,7 @@ export async function createServer(config: MockcraftConfig): Promise<MockcraftSe
                 return c.json(aiResponse.body as object, aiResponse.status as 200);
             } catch (err) {
                 // SECURITY: Don't expose AI errors to clients
-                console.error('[mockcraft] AI fallback failed:', err instanceof Error ? err.message : 'Unknown');
+                safeError('[mockcraft] AI fallback failed:', err instanceof Error ? err.message : 'Unknown');
             }
         }
 
@@ -321,7 +322,8 @@ export async function createServer(config: MockcraftConfig): Promise<MockcraftSe
             port: config.port,
         }, () => {
             // Initialize WebSocket on the HTTP server
-            initWebSocket(httpServer as unknown as Server);
+            // @ts-expect-error — @hono/node-server returns a compatible HTTP server but types diverge from node:http.Server
+            initWebSocket(httpServer);
 
             safeLog(`\n  ⚡ Mockcraft v0.1.0`);
             safeLog(`  → Mock server:  http://localhost:${config.port}`);
@@ -337,7 +339,8 @@ export async function createServer(config: MockcraftConfig): Promise<MockcraftSe
 
             resolve({
                 app,
-                server: httpServer as unknown as Server,
+                // @ts-expect-error — @hono/node-server returns a compatible HTTP server but types diverge from node:http.Server
+                server: httpServer,
                 config,
                 close: () => {
                     httpServer.close();

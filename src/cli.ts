@@ -76,7 +76,7 @@ program
 
         // Create config file
         const configContent = `// Mockcraft configuration
-// Docs: https://github.com/your-username/mockcraft
+// Docs: https://github.com/favazmusthafa/Mockcraft
 
 export default {
   port: 3000,

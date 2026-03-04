@@ -46,11 +46,11 @@
     "developer-tools",
     "testing"
   ],
-  "author": "",
+  "author": "Favaz Musthafa",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/mockcraft"
+    "url": "https://github.com/favazmusthafa/Mockcraft"
   },
   "dependencies": {
     "hono": "^4.6.0",

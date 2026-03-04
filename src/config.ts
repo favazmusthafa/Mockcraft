@@ -7,7 +7,7 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import { z } from 'zod';
-import { validateUrl, safeLog } from './security.js';
+import { validateUrl, safeLog, safeError } from './security.js';
 
 // ─────────────────────────────────────────────────────────────
 // SECURITY: Config schema validated with Zod — no arbitrary data
@@ -74,7 +74,7 @@ export async function loadConfig(cwd: string = process.cwd()): Promise<Mockcraft
             rawConfig = configModule.default ?? configModule;
             safeLog('[mockcraft] Loaded config from mockcraft.config.ts');
         } catch (err) {
-            console.error('[mockcraft] Error loading mockcraft.config.ts — falling back to JSON');
+            safeError('[mockcraft] Error loading mockcraft.config.ts — falling back to JSON');
         }
     }
 
@@ -88,7 +88,7 @@ export async function loadConfig(cwd: string = process.cwd()): Promise<Mockcraft
             rawConfig = JSON.parse(content);
             safeLog('[mockcraft] Loaded config from mockcraft.config.json');
         } catch (err) {
-            console.error('[mockcraft] Error loading mockcraft.config.json — using defaults');
+            safeError('[mockcraft] Error loading mockcraft.config.json — using defaults');
         }
     }
 
@@ -100,7 +100,7 @@ export async function loadConfig(cwd: string = process.cwd()): Promise<Mockcraft
     // SECURITY: Validate shape strictly with Zod
     const result = MockcraftConfigSchema.safeParse(rawConfig);
     if (!result.success) {
-        console.error('[mockcraft] Invalid config:', result.error.flatten().fieldErrors);
+        safeError('[mockcraft] Invalid config:', JSON.stringify(result.error.flatten().fieldErrors));
         throw new Error('Invalid mockcraft configuration. Check the errors above.');
     }
 

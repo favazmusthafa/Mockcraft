@@ -6,7 +6,7 @@
 
 import { WebSocketServer, WebSocket } from 'ws';
 import type { Server } from 'node:http';
-import { safeLog, redact } from './security.js';
+import { safeLog, safeError, redact } from './security.js';
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -53,7 +53,7 @@ export function initWebSocket(server: Server): WebSocketServer {
 
         ws.on('error', (err) => {
             // SECURITY: Don't leak error details
-            console.error('[mockcraft] WS error:', err.message);
+            safeError('[mockcraft] WS error:', err.message);
         });
 
         ws.on('close', () => {

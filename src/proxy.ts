@@ -8,6 +8,7 @@ import type { Context } from 'hono';
 import {
     stripSensitiveHeaders,
     safeLog,
+    safeError,
     validateUrl,
 } from './security.js';
 import { saveFixture, type Fixture } from './fixtures.js';
@@ -37,7 +38,7 @@ export async function proxyRequest(
     // SECURITY: Validate proxy target URL
     const urlCheck = validateUrl(target, 'remote');
     if (!urlCheck.valid) {
-        console.error(`[mockcraft] SSRF protection: proxy target rejected — ${urlCheck.error}`);
+        safeError(`[mockcraft] SSRF protection: proxy target rejected — ${urlCheck.error}`);
         return c.json({ error: 'Invalid proxy target' }, 502);
     }
 
@@ -73,8 +74,7 @@ export async function proxyRequest(
             headers,
             body: ['GET', 'HEAD'].includes(c.req.method) ? undefined : c.req.raw.body,
             signal: controller.signal,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            duplex: 'half' as any,
+            duplex: 'half',
         });
 
         // Read response body
@@ -106,7 +106,7 @@ export async function proxyRequest(
                 safeLog(`[mockcraft] Recorded proxy response for ${c.req.method} ${c.req.path}`);
             } catch {
                 // SECURITY: Don't leak save errors
-                console.error('[mockcraft] Failed to record proxy response');
+                safeError('[mockcraft] Failed to record proxy response');
             }
         }
 
@@ -141,7 +141,7 @@ export async function proxyRequest(
         }
 
         // SECURITY: Never leak internal error details
-        console.error('[mockcraft] Proxy error:', err instanceof Error ? err.message : 'Unknown error');
+        safeError('[mockcraft] Proxy error:', err instanceof Error ? err.message : 'Unknown error');
         return c.json({ error: 'Proxy request failed' }, 502);
     } finally {
         clearTimeout(timeout);

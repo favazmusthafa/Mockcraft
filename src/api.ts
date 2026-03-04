@@ -5,9 +5,10 @@
  */
 
 import { Hono } from 'hono';
+import fs from 'node:fs';
+import path from 'node:path';
 import {
     listFixtures,
-    loadFixture,
     deleteFixture,
 } from './fixtures.js';
 import { generateMockResponse } from './ai.js';
@@ -16,6 +17,8 @@ import type { MockcraftConfig } from './config.js';
 import {
     createRateLimiter,
     sanitizeFilename,
+    safePath,
+    SecurityError,
 } from './security.js';
 
 // ─────────────────────────────────────────────────────────────
@@ -73,16 +76,31 @@ export function createApiRouter(config: MockcraftConfig): Hono {
     });
 
     // ─── Get single fixture ──────────────────────────────────
-    api.get('/fixtures/:method/:path', (c) => {
-        const method = c.req.param('method').toUpperCase();
-        const fixturePath = '/' + c.req.param('path');
-        const query = new URL(c.req.url).searchParams.get('q') || undefined;
+    api.get('/fixtures/detail/*', (c) => {
+        // Extract everything after /fixtures/detail/
+        const filename = decodeURIComponent(c.req.path.replace('/__mockcraft__/api/fixtures/detail/', ''));
+        const safeFilename = sanitizeFilename(filename);
 
-        const fixture = loadFixture(config.fixturesDir, method, fixturePath, query);
-        if (!fixture) {
-            return c.json({ error: 'Fixture not found' }, 404);
+        if (!safeFilename.endsWith('.json')) {
+            return c.json({ error: 'Invalid fixture filename' }, 400);
         }
-        return c.json(fixture);
+
+        try {
+            // SECURITY: Path traversal prevention — validate resolved path is inside fixtures dir
+            const filePath = safePath(safeFilename, path.resolve(config.fixturesDir));
+
+            if (!fs.existsSync(filePath)) {
+                return c.json({ error: 'Fixture not found' }, 404);
+            }
+
+            const content = fs.readFileSync(filePath, 'utf-8');
+            return c.json(JSON.parse(content));
+        } catch (err) {
+            if (err instanceof SecurityError) {
+                return c.json({ error: 'Invalid fixture path' }, 400);
+            }
+            return c.json({ error: 'Failed to read fixture' }, 500);
+        }
     });
 
     // ─── Delete fixture ──────────────────────────────────────

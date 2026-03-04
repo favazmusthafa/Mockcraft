@@ -11,6 +11,7 @@ import {
     safePath,
     sanitizeFilename,
     safeLog,
+    safeError,
     SecurityError,
 } from './security.js';
 
@@ -116,13 +117,13 @@ export function loadFixture(
         const content = fs.readFileSync(filePath, 'utf-8');
         // SECURITY: Validate file size before parsing
         if (Buffer.byteLength(content, 'utf-8') > 1_048_576) {
-            console.error('[mockcraft] Fixture file exceeds 1MB limit');
+            safeError('[mockcraft] Fixture file exceeds 1MB limit');
             return null;
         }
         return JSON.parse(content) as Fixture;
     } catch {
         // SECURITY: Never leak file paths in errors
-        console.error('[mockcraft] Failed to read fixture');
+        safeError('[mockcraft] Failed to read fixture');
         return null;
     }
 }
@@ -142,7 +143,7 @@ export function deleteFixture(fixturesDir: string, filename: string): boolean {
         return false;
     } catch (err) {
         if (err instanceof SecurityError) {
-            console.error('[mockcraft] Security violation: attempted path traversal on delete');
+            safeError('[mockcraft] Security violation: attempted path traversal on delete');
         }
         return false;
     }

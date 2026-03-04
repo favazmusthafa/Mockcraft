@@ -9,6 +9,7 @@ import {
     validateUrl,
     createRateLimiter,
     safeLog,
+    safeError,
 } from './security.js';
 import { saveFixture, type Fixture } from './fixtures.js';
 import type { MockcraftConfig } from './config.js';
@@ -348,7 +349,7 @@ export async function generateMockResponse(
                 saveFixture(config.fixturesDir, fixture);
             } catch (saveErr) {
                 // SECURITY: Don't leak save errors to callers
-                console.error('[mockcraft] Failed to auto-save AI fixture');
+                safeError('[mockcraft] Failed to auto-save AI fixture');
             }
 
             return response;

@@ -53,6 +53,16 @@ export function safeLog(message: string, ...args: unknown[]): void {
     ));
 }
 
+/**
+ * Safe console.error that redacts secrets.
+ */
+export function safeError(message: string, ...args: unknown[]): void {
+    // SECURITY: Never log raw secrets in error output
+    console.error(redact(message), ...args.map(a =>
+        typeof a === 'string' ? redact(a) : a
+    ));
+}
+
 // ─────────────────────────────────────────────────────────────
 // SECURITY: URL validation — SSRF protection
 // ─────────────────────────────────────────────────────────────

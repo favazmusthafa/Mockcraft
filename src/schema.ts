@@ -6,7 +6,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { safeLog } from './security.js';
+import { safeLog, safeError } from './security.js';
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -62,7 +62,7 @@ export function loadSchema(schemaPath: string, cwd: string = process.cwd()): Sch
 
         // SECURITY: Validate file size before parsing
         if (Buffer.byteLength(content, 'utf-8') > 10_485_760) { // 10MB limit for schemas
-            console.error('[mockcraft] Schema file exceeds 10MB limit');
+            safeError('[mockcraft] Schema file exceeds 10MB limit');
             return [];
         }
 
@@ -70,7 +70,7 @@ export function loadSchema(schemaPath: string, cwd: string = process.cwd()): Sch
         return extractRoutes(spec);
     } catch (err) {
         // SECURITY: Never leak file paths in error messages to consumers
-        console.error('[mockcraft] Failed to parse OpenAPI schema');
+        safeError('[mockcraft] Failed to parse OpenAPI schema');
         return [];
     }
 }
