@@ -30,7 +30,11 @@
     "dev": "tsc --watch",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "tsc --noEmit",
+    "lint": "eslint src/ tests/",
+    "lint:fix": "eslint src/ tests/ --fix",
+    "format": "prettier --write src/ tests/",
+    "format:check": "prettier --check src/ tests/",
+    "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build:all",
     "start": "node dist/cli.js"
   },
@@ -53,17 +57,22 @@
     "url": "https://github.com/favazmusthafa/Mockcraft"
   },
   "dependencies": {
-    "hono": "^4.6.0",
     "@hono/node-server": "^1.13.0",
     "commander": "^12.1.0",
+    "hono": "^4.6.0",
     "ws": "^8.18.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^22.0.0",
     "@types/ws": "^8.5.0",
+    "eslint": "^10.0.2",
+    "eslint-config-prettier": "^10.1.8",
+    "happy-dom": "^15.0.0",
+    "prettier": "^3.8.1",
     "typescript": "^5.5.0",
-    "vitest": "^2.1.0",
-    "happy-dom": "^15.0.0"
+    "typescript-eslint": "^8.56.1",
+    "vitest": "^2.1.0"
   }
 }

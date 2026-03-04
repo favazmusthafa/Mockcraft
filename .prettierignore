@@ -1,0 +1,9 @@
+dist/
+ui-dist/
+ui/
+node_modules/
+fixtures/
+coverage/
+*.config.js
+*.config.ts
+mockcraft.config.*

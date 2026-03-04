@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { loadConfig, MockcraftConfigSchema, DEFAULT_CONFIG } from '../src/config.js';
+import { loadConfig, MockcraftConfigSchema } from '../src/config.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -43,7 +43,7 @@ describe('loadConfig() with JSON', () => {
         fs.writeFileSync(
             path.join(tempDir, 'mockcraft.config.json'),
             JSON.stringify(validConfig),
-            'utf-8'
+            'utf-8',
         );
 
         const config = await loadConfig(tempDir);
@@ -56,7 +56,7 @@ describe('loadConfig() with JSON', () => {
         fs.writeFileSync(
             path.join(tempDir, 'mockcraft.config.json'),
             JSON.stringify({ port: 99999 }),
-            'utf-8'
+            'utf-8',
         );
 
         await expect(loadConfig(tempDir)).rejects.toThrow();
@@ -112,7 +112,7 @@ describe('loadConfig() SSRF protection', () => {
             JSON.stringify({
                 ai: { provider: 'ollama', baseUrl: 'http://evil.com:11434' },
             }),
-            'utf-8'
+            'utf-8',
         );
 
         await expect(loadConfig(tempDir)).rejects.toThrow(/SSRF/);
@@ -124,7 +124,7 @@ describe('loadConfig() SSRF protection', () => {
             JSON.stringify({
                 ai: { provider: 'grok', baseUrl: 'http://api.x.ai' },
             }),
-            'utf-8'
+            'utf-8',
         );
 
         await expect(loadConfig(tempDir)).rejects.toThrow(/SSRF/);

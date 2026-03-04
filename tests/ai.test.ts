@@ -43,7 +43,7 @@ describe('AI provider: none', () => {
     it('should throw when provider is none', async () => {
         const config = makeConfig({ provider: 'none' });
         await expect(
-            generateMockResponse(config, { method: 'GET', path: '/api/test' })
+            generateMockResponse(config, { method: 'GET', path: '/api/test' }),
         ).rejects.toThrow(/provider.*none/i);
     });
 });
@@ -58,7 +58,7 @@ describe('AI SSRF protection', () => {
         });
 
         await expect(
-            generateMockResponse(config, { method: 'GET', path: '/api/test' })
+            generateMockResponse(config, { method: 'GET', path: '/api/test' }),
         ).rejects.toThrow(/SSRF/);
     });
 
@@ -70,7 +70,7 @@ describe('AI SSRF protection', () => {
         });
 
         await expect(
-            generateMockResponse(config, { method: 'GET', path: '/api/test' })
+            generateMockResponse(config, { method: 'GET', path: '/api/test' }),
         ).rejects.toThrow(/SSRF/);
     });
 });
@@ -86,7 +86,7 @@ describe('AI API key validation', () => {
         vi.stubGlobal('fetch', vi.fn());
 
         await expect(
-            generateMockResponse(config, { method: 'GET', path: '/api/test' })
+            generateMockResponse(config, { method: 'GET', path: '/api/test' }),
         ).rejects.toThrow(/GROK_API_KEY/);
     });
 
@@ -97,7 +97,7 @@ describe('AI API key validation', () => {
         vi.stubGlobal('fetch', vi.fn());
 
         await expect(
-            generateMockResponse(config, { method: 'GET', path: '/api/test' })
+            generateMockResponse(config, { method: 'GET', path: '/api/test' }),
         ).rejects.toThrow(/ANTHROPIC_API_KEY/);
     });
 });
@@ -111,9 +111,10 @@ describe('AI rate limiting', () => {
         // Mock fetch to simulate successful Ollama response
         const mockResponse = {
             ok: true,
-            json: () => Promise.resolve({
-                message: { content: '{"status":200,"body":{"ok":true}}' },
-            }),
+            json: () =>
+                Promise.resolve({
+                    message: { content: '{"status":200,"body":{"ok":true}}' },
+                }),
         };
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue(mockResponse));
 
@@ -124,7 +125,7 @@ describe('AI rate limiting', () => {
 
         // 11th call should be rate limited
         await expect(
-            generateMockResponse(config, { method: 'GET', path: '/api/ratelimit' })
+            generateMockResponse(config, { method: 'GET', path: '/api/ratelimit' }),
         ).rejects.toThrow(/Rate limit/);
     });
 });
@@ -141,10 +142,13 @@ describe('AI Ollama integration (mocked)', () => {
             body: { users: [{ id: 1, name: 'Alice' }] },
         });
 
-        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            ok: true,
-            json: () => Promise.resolve({ message: { content: mockBody } }),
-        }));
+        vi.stubGlobal(
+            'fetch',
+            vi.fn().mockResolvedValue({
+                ok: true,
+                json: () => Promise.resolve({ message: { content: mockBody } }),
+            }),
+        );
 
         const result = await generateMockResponse(config, {
             method: 'GET',
@@ -159,12 +163,16 @@ describe('AI Ollama integration (mocked)', () => {
     it('should auto-save AI response as fixture', async () => {
         const config = makeConfig({ provider: 'ollama' });
 
-        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            ok: true,
-            json: () => Promise.resolve({
-                message: { content: '{"status":200,"body":{"saved":true}}' },
+        vi.stubGlobal(
+            'fetch',
+            vi.fn().mockResolvedValue({
+                ok: true,
+                json: () =>
+                    Promise.resolve({
+                        message: { content: '{"status":200,"body":{"saved":true}}' },
+                    }),
             }),
-        }));
+        );
 
         await generateMockResponse(config, { method: 'GET', path: '/api/saved' });
 

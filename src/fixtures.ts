@@ -67,7 +67,7 @@ export function fixtureFilename(method: string, pathname: string, query?: string
     const hash = hashRequest(method, pathname, query);
     // SECURITY: Sanitize all parts of the filename
     const safePart = sanitizeFilename(
-        `${method.toLowerCase()}_${pathname.replace(/\//g, '_').replace(/^_/, '')}`
+        `${method.toLowerCase()}_${pathname.replace(/\//g, '_').replace(/^_/, '')}`,
     );
     return `${safePart}_${hash}.json`;
 }
@@ -75,10 +75,7 @@ export function fixtureFilename(method: string, pathname: string, query?: string
 /**
  * Save a fixture to disk.
  */
-export function saveFixture(
-    fixturesDir: string,
-    fixture: Fixture
-): string {
+export function saveFixture(fixturesDir: string, fixture: Fixture): string {
     ensureFixturesDir(fixturesDir);
     const filename = fixtureFilename(fixture.method, fixture.path, fixture.query);
 
@@ -101,7 +98,7 @@ export function loadFixture(
     fixturesDir: string,
     method: string,
     pathname: string,
-    query?: string
+    query?: string,
 ): Fixture | null {
     const filename = fixtureFilename(method, pathname, query);
     const resolved = path.resolve(fixturesDir);
@@ -153,27 +150,27 @@ export function deleteFixture(fixturesDir: string, filename: string): boolean {
  * List all fixtures in the directory.
  * Returns metadata only (not full file contents for performance).
  */
-export function listFixtures(fixturesDir: string): Array<{
+export function listFixtures(fixturesDir: string): {
     filename: string;
     method: string;
     path: string;
     source: string;
     createdAt: string;
-}> {
+}[] {
     const resolved = path.resolve(fixturesDir);
 
     if (!fs.existsSync(resolved)) {
         return [];
     }
 
-    const files = fs.readdirSync(resolved).filter(f => f.endsWith('.json'));
-    const fixtures: Array<{
+    const files = fs.readdirSync(resolved).filter((f) => f.endsWith('.json'));
+    const fixtures: {
         filename: string;
         method: string;
         path: string;
         source: string;
         createdAt: string;
-    }> = [];
+    }[] = [];
 
     for (const file of files) {
         try {

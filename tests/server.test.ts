@@ -4,13 +4,10 @@
  * Tests security headers, CORS, body limits, and fixture serving.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { Hono } from 'hono';
-import {
-    isAllowedOrigin,
-    MAX_BODY_SIZE,
-} from '../src/security.js';
-import { loadSchema, matchSchemaRoute } from '../src/schema.js';
+import { isAllowedOrigin, MAX_BODY_SIZE } from '../src/security.js';
+import { matchSchemaRoute } from '../src/schema.js';
 
 // ─── Security Headers ────────────────────────────────────────
 
@@ -55,7 +52,7 @@ describe('CORS middleware', () => {
         app.get('/test', (c) => c.json({ ok: true }));
 
         const res = await app.request('/test', {
-            headers: { 'Origin': 'http://localhost:5173' },
+            headers: { Origin: 'http://localhost:5173' },
         });
         expect(res.headers.get('Access-Control-Allow-Origin')).toBe('http://localhost:5173');
     });
@@ -72,7 +69,7 @@ describe('CORS middleware', () => {
         app.get('/test', (c) => c.json({ ok: true }));
 
         const res = await app.request('/test', {
-            headers: { 'Origin': 'http://evil.com' },
+            headers: { Origin: 'http://evil.com' },
         });
         expect(res.headers.get('Access-Control-Allow-Origin')).toBeNull();
     });
@@ -106,7 +103,13 @@ describe('Body size limit', () => {
 describe('Schema route matching', () => {
     it('should match exact paths', () => {
         const routes = [
-            { method: 'GET', path: '/api/users', statusCode: 200, contentType: 'application/json', exampleResponse: [] },
+            {
+                method: 'GET',
+                path: '/api/users',
+                statusCode: 200,
+                contentType: 'application/json',
+                exampleResponse: [],
+            },
         ];
         const match = matchSchemaRoute(routes, 'GET', '/api/users');
         expect(match).toBeDefined();
@@ -115,7 +118,13 @@ describe('Schema route matching', () => {
 
     it('should match path parameters', () => {
         const routes = [
-            { method: 'GET', path: '/api/users/{id}', statusCode: 200, contentType: 'application/json', exampleResponse: {} },
+            {
+                method: 'GET',
+                path: '/api/users/{id}',
+                statusCode: 200,
+                contentType: 'application/json',
+                exampleResponse: {},
+            },
         ];
         const match = matchSchemaRoute(routes, 'GET', '/api/users/123');
         expect(match).toBeDefined();
@@ -136,12 +145,15 @@ describe('404 Response', () => {
     it('should return helpful 404 when no mock found', async () => {
         const app = new Hono();
         app.all('*', (c) => {
-            return c.json({
-                error: 'No mock found',
-                method: c.req.method,
-                path: c.req.path,
-                hint: 'Create a fixture, add an OpenAPI schema, configure a proxy, or enable an AI provider.',
-            }, 404);
+            return c.json(
+                {
+                    error: 'No mock found',
+                    method: c.req.method,
+                    path: c.req.path,
+                    hint: 'Create a fixture, add an OpenAPI schema, configure a proxy, or enable an AI provider.',
+                },
+                404,
+            );
         });
 
         const res = await app.request('/nonexistent');

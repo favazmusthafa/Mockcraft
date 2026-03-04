@@ -5,12 +5,7 @@
  */
 
 import type { Context } from 'hono';
-import {
-    stripSensitiveHeaders,
-    safeLog,
-    safeError,
-    validateUrl,
-} from './security.js';
+import { stripSensitiveHeaders, safeLog, safeError, validateUrl } from './security.js';
 import { saveFixture, type Fixture } from './fixtures.js';
 import type { MockcraftConfig } from './config.js';
 import { broadcastEvent } from './ws.js';
@@ -22,15 +17,9 @@ import { broadcastEvent } from './ws.js';
 /**
  * Forward a request to the proxy target and optionally record the response.
  */
-export async function proxyRequest(
-    c: Context,
-    config: MockcraftConfig
-): Promise<Response> {
+export async function proxyRequest(c: Context, config: MockcraftConfig): Promise<Response> {
     if (!config.proxy?.target) {
-        return c.json(
-            { error: 'No proxy target configured' },
-            502
-        );
+        return c.json({ error: 'No proxy target configured' }, 502);
     }
 
     const target = config.proxy.target;
@@ -95,7 +84,10 @@ export async function proxyRequest(
                     path: c.req.path,
                     query: new URL(c.req.url).search.replace(/^\?/, '') || undefined,
                     status: proxyResponse.status,
-                    headers: { 'content-type': proxyResponse.headers.get('content-type') || 'application/json' },
+                    headers: {
+                        'content-type':
+                            proxyResponse.headers.get('content-type') || 'application/json',
+                    },
                     body: parsedBody,
                     createdAt: new Date().toISOString(),
                     source: 'proxy',

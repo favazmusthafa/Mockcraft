@@ -18,12 +18,7 @@ import { generateMockResponse } from './ai.js';
 import { proxyRequest } from './proxy.js';
 import { initWebSocket, broadcastEvent } from './ws.js';
 import { createApiRouter } from './api.js';
-import {
-    isAllowedOrigin,
-    MAX_BODY_SIZE,
-    safeLog,
-    safeError,
-} from './security.js';
+import { isAllowedOrigin, MAX_BODY_SIZE, safeLog, safeError } from './security.js';
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -73,7 +68,7 @@ export async function createServer(config: MockcraftConfig): Promise<MockcraftSe
         if (c.req.path.startsWith('/__mockcraft__')) {
             c.res.headers.set(
                 'Content-Security-Policy',
-                "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws://localhost:* ws://127.0.0.1:*; img-src 'self' data:;"
+                "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws://localhost:* ws://127.0.0.1:*; img-src 'self' data:;",
             );
         }
     });
@@ -84,7 +79,10 @@ export async function createServer(config: MockcraftConfig): Promise<MockcraftSe
 
         if (origin && isAllowedOrigin(origin)) {
             c.res.headers.set('Access-Control-Allow-Origin', origin);
-            c.res.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+            c.res.headers.set(
+                'Access-Control-Allow-Methods',
+                'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+            );
             c.res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Accept');
             c.res.headers.set('Access-Control-Max-Age', '86400');
         }
@@ -258,10 +256,7 @@ export async function createServer(config: MockcraftConfig): Promise<MockcraftSe
                 source: 'schema',
                 timestamp: Date.now(),
             });
-            return c.json(
-                schemaRoute.exampleResponse as object,
-                schemaRoute.statusCode as 200
-            );
+            return c.json(schemaRoute.exampleResponse as object, schemaRoute.statusCode as 200);
         }
 
         // 3. Try proxy
@@ -292,7 +287,10 @@ export async function createServer(config: MockcraftConfig): Promise<MockcraftSe
                 return c.json(aiResponse.body as object, aiResponse.status as 200);
             } catch (err) {
                 // SECURITY: Don't expose AI errors to clients
-                safeError('[mockcraft] AI fallback failed:', err instanceof Error ? err.message : 'Unknown');
+                safeError(
+                    '[mockcraft] AI fallback failed:',
+                    err instanceof Error ? err.message : 'Unknown',
+                );
             }
         }
 
@@ -306,46 +304,52 @@ export async function createServer(config: MockcraftConfig): Promise<MockcraftSe
             timestamp: Date.now(),
         });
 
-        return c.json({
-            error: 'No mock found',
-            method,
-            path: pathname,
-            hint: 'Create a fixture, add an OpenAPI schema, configure a proxy, or enable an AI provider.',
-        }, 404);
+        return c.json(
+            {
+                error: 'No mock found',
+                method,
+                path: pathname,
+                hint: 'Create a fixture, add an OpenAPI schema, configure a proxy, or enable an AI provider.',
+            },
+            404,
+        );
     });
 
     // ─── Start HTTP server ─────────────────────────────────────
 
     return new Promise<MockcraftServer>((resolve) => {
-        const httpServer = serve({
-            fetch: app.fetch,
-            port: config.port,
-        }, () => {
-            // Initialize WebSocket on the HTTP server
-            // @ts-expect-error — @hono/node-server returns a compatible HTTP server but types diverge from node:http.Server
-            initWebSocket(httpServer);
-
-            safeLog(`\n  ⚡ Mockcraft v0.1.0`);
-            safeLog(`  → Mock server:  http://localhost:${config.port}`);
-            safeLog(`  → Inspector UI: http://localhost:${config.port}/__mockcraft__`);
-            safeLog(`  → WebSocket:    ws://localhost:${config.port}/__mockcraft__/ws`);
-            if (config.ai.provider !== 'none') {
-                safeLog(`  → AI Provider:  ${config.ai.provider} (${config.ai.model})`);
-            }
-            if (config.proxy?.target) {
-                safeLog(`  → Proxy target: ${config.proxy.target}`);
-            }
-            safeLog('');
-
-            resolve({
-                app,
+        const httpServer = serve(
+            {
+                fetch: app.fetch,
+                port: config.port,
+            },
+            () => {
+                // Initialize WebSocket on the HTTP server
                 // @ts-expect-error — @hono/node-server returns a compatible HTTP server but types diverge from node:http.Server
-                server: httpServer,
-                config,
-                close: () => {
-                    httpServer.close();
-                },
-            });
-        });
+                initWebSocket(httpServer);
+
+                safeLog(`\n  ⚡ Mockcraft v0.1.0`);
+                safeLog(`  → Mock server:  http://localhost:${config.port}`);
+                safeLog(`  → Inspector UI: http://localhost:${config.port}/__mockcraft__`);
+                safeLog(`  → WebSocket:    ws://localhost:${config.port}/__mockcraft__/ws`);
+                if (config.ai.provider !== 'none') {
+                    safeLog(`  → AI Provider:  ${config.ai.provider} (${config.ai.model})`);
+                }
+                if (config.proxy?.target) {
+                    safeLog(`  → Proxy target: ${config.proxy.target}`);
+                }
+                safeLog('');
+
+                resolve({
+                    app,
+                    // @ts-expect-error — @hono/node-server returns a compatible HTTP server but types diverge from node:http.Server
+                    server: httpServer,
+                    config,
+                    close: () => {
+                        httpServer.close();
+                    },
+                });
+            },
+        );
     });
 }

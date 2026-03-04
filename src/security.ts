@@ -48,9 +48,7 @@ export function redactObject(obj: Record<string, unknown>): Record<string, unkno
  */
 export function safeLog(message: string, ...args: unknown[]): void {
     // SECURITY: Never log raw secrets
-    console.log(redact(message), ...args.map(a =>
-        typeof a === 'string' ? redact(a) : a
-    ));
+    console.log(redact(message), ...args.map((a) => (typeof a === 'string' ? redact(a) : a)));
 }
 
 /**
@@ -58,9 +56,7 @@ export function safeLog(message: string, ...args: unknown[]): void {
  */
 export function safeError(message: string, ...args: unknown[]): void {
     // SECURITY: Never log raw secrets in error output
-    console.error(redact(message), ...args.map(a =>
-        typeof a === 'string' ? redact(a) : a
-    ));
+    console.error(redact(message), ...args.map((a) => (typeof a === 'string' ? redact(a) : a)));
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -72,7 +68,10 @@ export function safeError(message: string, ...args: unknown[]): void {
  * - Local providers (ollama): must be http://localhost:* or http://127.0.0.1:*
  * - Remote providers (grok, claude): must be https://
  */
-export function validateUrl(url: string, provider: 'ollama' | 'grok' | 'claude' | 'local' | 'remote'): {
+export function validateUrl(
+    url: string,
+    provider: 'ollama' | 'grok' | 'claude' | 'local' | 'remote',
+): {
     valid: boolean;
     error?: string;
 } {
@@ -122,7 +121,10 @@ export function isPathInside(childPath: string, parentPath: string): boolean {
     const normalizedChild = resolvedChild.toLowerCase() + path.sep;
     const normalizedParent = resolvedParent.toLowerCase() + path.sep;
 
-    return normalizedChild.startsWith(normalizedParent) || resolvedChild.toLowerCase() === resolvedParent.toLowerCase();
+    return (
+        normalizedChild.startsWith(normalizedParent) ||
+        resolvedChild.toLowerCase() === resolvedParent.toLowerCase()
+    );
 }
 
 /**
@@ -167,11 +169,31 @@ export function safePath(requestedPath: string, allowedRoot: string): string {
 // ─────────────────────────────────────────────────────────────
 
 // SECURITY: Characters not allowed in fixture filenames
+// eslint-disable-next-line no-control-regex -- Intentional: strip control chars for safe filenames
 const UNSAFE_FILENAME_RE = /[<>:"/\\|?*\x00-\x1f]/g;
 const RESERVED_NAMES = new Set([
-    'con', 'prn', 'aux', 'nul',
-    'com1', 'com2', 'com3', 'com4', 'com5', 'com6', 'com7', 'com8', 'com9',
-    'lpt1', 'lpt2', 'lpt3', 'lpt4', 'lpt5', 'lpt6', 'lpt7', 'lpt8', 'lpt9',
+    'con',
+    'prn',
+    'aux',
+    'nul',
+    'com1',
+    'com2',
+    'com3',
+    'com4',
+    'com5',
+    'com6',
+    'com7',
+    'com8',
+    'com9',
+    'lpt1',
+    'lpt2',
+    'lpt3',
+    'lpt4',
+    'lpt5',
+    'lpt6',
+    'lpt7',
+    'lpt8',
+    'lpt9',
 ]);
 
 /**
@@ -182,8 +204,8 @@ export function sanitizeFilename(name: string): string {
     // SECURITY: Strip all unsafe characters, limit length
     let sanitized = name
         .replace(UNSAFE_FILENAME_RE, '_')
-        .replace(/\.+/g, '.')        // collapse dots
-        .replace(/^\.+|\.+$/g, '')   // strip leading/trailing dots
+        .replace(/\.+/g, '.') // collapse dots
+        .replace(/^\.+|\.+$/g, '') // strip leading/trailing dots
         .trim();
 
     // SECURITY: Block Windows reserved device names
@@ -218,7 +240,7 @@ interface RateLimitEntry {
  * @param maxCalls Maximum calls per window
  * @param windowMs Window duration in milliseconds
  */
-export function createRateLimiter(maxCalls: number = 10, windowMs: number = 60_000) {
+export function createRateLimiter(maxCalls = 10, windowMs = 60_000) {
     // SECURITY: In-memory rate limiter to prevent AI API abuse
     const store = new Map<string, RateLimitEntry>();
 
@@ -240,7 +262,11 @@ export function createRateLimiter(maxCalls: number = 10, windowMs: number = 60_0
             }
 
             entry.count++;
-            return { allowed: true, remaining: maxCalls - entry.count, resetIn: entry.resetAt - now };
+            return {
+                allowed: true,
+                remaining: maxCalls - entry.count,
+                resetIn: entry.resetAt - now,
+            };
         },
 
         /** Reset all entries (useful for testing) */
@@ -258,9 +284,7 @@ export function createRateLimiter(maxCalls: number = 10, windowMs: number = 60_0
  * Generate a deterministic hash key for a request (method + path + sorted query).
  */
 export function hashRequest(method: string, pathname: string, query?: string): string {
-    const normalizedQuery = query
-        ? query.split('&').sort().join('&')
-        : '';
+    const normalizedQuery = query ? query.split('&').sort().join('&') : '';
     const raw = `${method.toUpperCase()}:${pathname}:${normalizedQuery}`;
     return createHash('sha256').update(raw).digest('hex').substring(0, 16);
 }

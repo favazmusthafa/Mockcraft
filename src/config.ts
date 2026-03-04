@@ -15,20 +15,24 @@ import { validateUrl, safeLog, safeError } from './security.js';
 
 const AIProviderSchema = z.enum(['ollama', 'grok', 'claude', 'none']).default('none');
 
-const AIConfigSchema = z.object({
-    provider: AIProviderSchema,
-    baseUrl: z.string().url().optional(),
-    model: z.string().default('llama3.2'),
-    apiKey: z.string().optional(),
-    temperature: z.number().min(0).max(2).default(0.7),
-    maxTokens: z.number().int().min(1).max(4096).default(800),
-}).default({});
+const AIConfigSchema = z
+    .object({
+        provider: AIProviderSchema,
+        baseUrl: z.string().url().optional(),
+        model: z.string().default('llama3.2'),
+        apiKey: z.string().optional(),
+        temperature: z.number().min(0).max(2).default(0.7),
+        maxTokens: z.number().int().min(1).max(4096).default(800),
+    })
+    .default({});
 
-const ProxyConfigSchema = z.object({
-    target: z.string().url(),
-    record: z.boolean().default(true),
-    forwardAuth: z.boolean().default(false),
-}).optional();
+const ProxyConfigSchema = z
+    .object({
+        target: z.string().url(),
+        record: z.boolean().default(true),
+        forwardAuth: z.boolean().default(false),
+    })
+    .optional();
 
 export const MockcraftConfigSchema = z.object({
     port: z.number().int().min(1).max(65535).default(3000),
@@ -100,7 +104,10 @@ export async function loadConfig(cwd: string = process.cwd()): Promise<Mockcraft
     // SECURITY: Validate shape strictly with Zod
     const result = MockcraftConfigSchema.safeParse(rawConfig);
     if (!result.success) {
-        safeError('[mockcraft] Invalid config:', JSON.stringify(result.error.flatten().fieldErrors));
+        safeError(
+            '[mockcraft] Invalid config:',
+            JSON.stringify(result.error.flatten().fieldErrors),
+        );
         throw new Error('Invalid mockcraft configuration. Check the errors above.');
     }
 
@@ -146,7 +153,7 @@ export async function loadConfig(cwd: string = process.cwd()): Promise<Mockcraft
  */
 export function mergeCliOverrides(
     config: MockcraftConfig,
-    overrides: { port?: number; proxy?: string }
+    overrides: { port?: number; proxy?: string },
 ): MockcraftConfig {
     const merged = { ...config };
 

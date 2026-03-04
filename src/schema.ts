@@ -35,7 +35,10 @@ interface OpenAPIOperation {
 
 interface OpenAPIResponse {
     description?: string;
-    content?: Record<string, { schema?: unknown; example?: unknown; examples?: Record<string, { value?: unknown }> }>;
+    content?: Record<
+        string,
+        { schema?: unknown; example?: unknown; examples?: Record<string, { value?: unknown }> }
+    >;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -61,7 +64,8 @@ export function loadSchema(schemaPath: string, cwd: string = process.cwd()): Sch
         const content = fs.readFileSync(resolved, 'utf-8');
 
         // SECURITY: Validate file size before parsing
-        if (Buffer.byteLength(content, 'utf-8') > 10_485_760) { // 10MB limit for schemas
+        if (Buffer.byteLength(content, 'utf-8') > 10_485_760) {
+            // 10MB limit for schemas
             safeError('[mockcraft] Schema file exceeds 10MB limit');
             return [];
         }
@@ -110,7 +114,7 @@ function extractRoutes(spec: OpenAPISpec): SchemaRoute[] {
 function extractRouteFromOperation(
     routePath: string,
     method: string,
-    operation: OpenAPIOperation
+    operation: OpenAPIOperation,
 ): SchemaRoute | null {
     // Find the first successful response (2xx)
     const responses = operation.responses ?? {};
@@ -161,12 +165,10 @@ function extractRouteFromOperation(
 export function matchSchemaRoute(
     routes: SchemaRoute[],
     method: string,
-    pathname: string
+    pathname: string,
 ): SchemaRoute | undefined {
     // Exact match first
-    const exact = routes.find(
-        r => r.method === method.toUpperCase() && r.path === pathname
-    );
+    const exact = routes.find((r) => r.method === method.toUpperCase() && r.path === pathname);
     if (exact) return exact;
 
     // Path parameter matching: /users/{id} → /users/123

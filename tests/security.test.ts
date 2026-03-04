@@ -27,7 +27,9 @@ import fs from 'node:fs';
 describe('redact()', () => {
     it('should redact Bearer tokens', () => {
         expect(redact('Authorization: Bearer sk-1234567890abcdef')).toContain('[REDACTED]');
-        expect(redact('Authorization: Bearer sk-1234567890abcdef')).not.toContain('sk-1234567890abcdef');
+        expect(redact('Authorization: Bearer sk-1234567890abcdef')).not.toContain(
+            'sk-1234567890abcdef',
+        );
     });
 
     it('should redact API keys with known prefixes', () => {
@@ -228,8 +230,8 @@ describe('validateBodySize()', () => {
 describe('stripSensitiveHeaders()', () => {
     it('should strip auth and cookie headers', () => {
         const headers = new Headers({
-            'authorization': 'Bearer token',
-            'cookie': 'session=abc',
+            authorization: 'Bearer token',
+            cookie: 'session=abc',
             'content-type': 'application/json',
         });
 

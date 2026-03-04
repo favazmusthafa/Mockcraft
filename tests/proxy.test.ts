@@ -10,10 +10,7 @@ import type { MockcraftConfig } from '../src/config.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import {
-    validateUrl,
-    stripSensitiveHeaders,
-} from '../src/security.js';
+import { validateUrl, stripSensitiveHeaders } from '../src/security.js';
 
 let tempDir: string;
 
@@ -51,8 +48,8 @@ describe('Proxy SSRF protection', () => {
 describe('Proxy header stripping', () => {
     it('should strip authorization and cookie headers', () => {
         const headers = new Headers({
-            'authorization': 'Bearer sk-secret123456',
-            'cookie': 'session=abc123',
+            authorization: 'Bearer sk-secret123456',
+            cookie: 'session=abc123',
             'content-type': 'application/json',
             'x-api-key': 'key-12345',
         });
@@ -84,7 +81,7 @@ describe('Proxy header stripping', () => {
     it('should not strip non-sensitive headers', () => {
         const headers = new Headers({
             'content-type': 'application/json',
-            'accept': 'application/json',
+            accept: 'application/json',
             'user-agent': 'MockcraftTest/1.0',
         });
 
@@ -128,7 +125,7 @@ describe('Proxy recording behavior', () => {
         expect(body.id).toBe(1);
 
         // Verify fixture was saved
-        const files = fs.readdirSync(tempDir).filter(f => f.endsWith('.json'));
+        const files = fs.readdirSync(tempDir).filter((f) => f.endsWith('.json'));
         expect(files.length).toBeGreaterThan(0);
     });
 });

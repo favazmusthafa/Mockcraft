@@ -81,12 +81,24 @@ describe('saveFixture() & loadFixture()', () => {
 describe('listFixtures()', () => {
     it('should list all fixtures', () => {
         saveFixture(tempDir, {
-            method: 'GET', path: '/api/a', status: 200,
-            headers: {}, body: {}, createdAt: '', source: 'manual', hash: '',
+            method: 'GET',
+            path: '/api/a',
+            status: 200,
+            headers: {},
+            body: {},
+            createdAt: '',
+            source: 'manual',
+            hash: '',
         });
         saveFixture(tempDir, {
-            method: 'POST', path: '/api/b', status: 201,
-            headers: {}, body: {}, createdAt: '', source: 'ai', hash: '',
+            method: 'POST',
+            path: '/api/b',
+            status: 201,
+            headers: {},
+            body: {},
+            createdAt: '',
+            source: 'ai',
+            hash: '',
         });
 
         const list = listFixtures(tempDir);
@@ -104,8 +116,14 @@ describe('listFixtures()', () => {
 describe('deleteFixture()', () => {
     it('should delete an existing fixture', () => {
         const fixture: Fixture = {
-            method: 'DELETE', path: '/api/item/1', status: 200,
-            headers: {}, body: {}, createdAt: '', source: 'manual', hash: '',
+            method: 'DELETE',
+            path: '/api/item/1',
+            status: 200,
+            headers: {},
+            body: {},
+            createdAt: '',
+            source: 'manual',
+            hash: '',
         };
 
         const filename = saveFixture(tempDir, fixture);

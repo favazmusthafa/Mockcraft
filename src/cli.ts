@@ -19,7 +19,9 @@ const program = new Command();
 
 program
     .name('mockcraft')
-    .description('⚡ The smartest local mock server — AI-powered fixtures, proxy recording, and a beautiful inspector.')
+    .description(
+        '⚡ The smartest local mock server — AI-powered fixtures, proxy recording, and a beautiful inspector.',
+    )
     .version('0.1.0');
 
 // ─── Default: Start server ───────────────────────────────────
@@ -43,11 +45,12 @@ program
                 safeLog(`[mockcraft] Opening inspector: ${url}`);
                 try {
                     const { exec } = await import('node:child_process');
-                    const openCmd = process.platform === 'win32'
-                        ? `start ${url}`
-                        : process.platform === 'darwin'
-                            ? `open ${url}`
-                            : `xdg-open ${url}`;
+                    const openCmd =
+                        process.platform === 'win32'
+                            ? `start ${url}`
+                            : process.platform === 'darwin'
+                              ? `open ${url}`
+                              : `xdg-open ${url}`;
                     exec(openCmd);
                 } catch {
                     // Browser open is best-effort
@@ -55,7 +58,10 @@ program
             }
         } catch (err) {
             // SECURITY: Don't leak stack traces
-            console.error('[mockcraft] Failed to start:', err instanceof Error ? err.message : 'Unknown error');
+            console.error(
+                '[mockcraft] Failed to start:',
+                err instanceof Error ? err.message : 'Unknown error',
+            );
             process.exit(1);
         }
     });
@@ -169,7 +175,9 @@ program
                     });
                     console.log(`  ✓ ${endpoint.method} ${endpoint.path}`);
                 } catch (err) {
-                    console.error(`  ✗ ${endpoint.method} ${endpoint.path}: ${err instanceof Error ? err.message : 'Failed'}`);
+                    console.error(
+                        `  ✗ ${endpoint.method} ${endpoint.path}: ${err instanceof Error ? err.message : 'Failed'}`,
+                    );
                 }
             }
 
@@ -177,7 +185,10 @@ program
             console.log('  Done! Run `npx mockcraft` to start serving your generated mocks.');
             console.log('');
         } catch (err) {
-            console.error('[mockcraft] Generate failed:', err instanceof Error ? err.message : 'Unknown error');
+            console.error(
+                '[mockcraft] Generate failed:',
+                err instanceof Error ? err.message : 'Unknown error',
+            );
             process.exit(1);
         }
     });

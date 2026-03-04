@@ -7,19 +7,11 @@
 import { Hono } from 'hono';
 import fs from 'node:fs';
 import path from 'node:path';
-import {
-    listFixtures,
-    deleteFixture,
-} from './fixtures.js';
+import { listFixtures, deleteFixture } from './fixtures.js';
 import { generateMockResponse } from './ai.js';
 import { getConnectedClients } from './ws.js';
 import type { MockcraftConfig } from './config.js';
-import {
-    createRateLimiter,
-    sanitizeFilename,
-    safePath,
-    SecurityError,
-} from './security.js';
+import { createRateLimiter, sanitizeFilename, safePath, SecurityError } from './security.js';
 
 // ─────────────────────────────────────────────────────────────
 // SECURITY: Rate limiter for API endpoints
@@ -48,11 +40,13 @@ export function createApiRouter(config: MockcraftConfig): Hono {
             port: config.port,
             fixturesDir: config.fixturesDir,
             schemaPath: config.schemaPath || null,
-            proxy: config.proxy ? {
-                target: config.proxy.target,
-                record: config.proxy.record,
-                forwardAuth: config.proxy.forwardAuth,
-            } : null,
+            proxy: config.proxy
+                ? {
+                      target: config.proxy.target,
+                      record: config.proxy.record,
+                      forwardAuth: config.proxy.forwardAuth,
+                  }
+                : null,
             ai: {
                 provider: config.ai.provider,
                 model: config.ai.model,
@@ -78,7 +72,9 @@ export function createApiRouter(config: MockcraftConfig): Hono {
     // ─── Get single fixture ──────────────────────────────────
     api.get('/fixtures/detail/*', (c) => {
         // Extract everything after /fixtures/detail/
-        const filename = decodeURIComponent(c.req.path.replace('/__mockcraft__/api/fixtures/detail/', ''));
+        const filename = decodeURIComponent(
+            c.req.path.replace('/__mockcraft__/api/fixtures/detail/', ''),
+        );
         const safeFilename = sanitizeFilename(filename);
 
         if (!safeFilename.endsWith('.json')) {
@@ -125,10 +121,13 @@ export function createApiRouter(config: MockcraftConfig): Hono {
         // SECURITY: Rate limit AI requests
         const rateCheck = apiRateLimiter.check('ai-regenerate');
         if (!rateCheck.allowed) {
-            return c.json({
-                error: 'Rate limit exceeded',
-                retryAfter: Math.ceil(rateCheck.resetIn / 1000),
-            }, 429);
+            return c.json(
+                {
+                    error: 'Rate limit exceeded',
+                    retryAfter: Math.ceil(rateCheck.resetIn / 1000),
+                },
+                429,
+            );
         }
 
         try {

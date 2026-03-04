@@ -98,10 +98,14 @@ describe('GET /fixtures', () => {
     it('should list saved fixtures', async () => {
         const config = makeConfig();
         saveFixture(tempDir, {
-            method: 'GET', path: '/api/users', status: 200,
+            method: 'GET',
+            path: '/api/users',
+            status: 200,
             headers: { 'content-type': 'application/json' },
-            body: { users: [] }, createdAt: new Date().toISOString(),
-            source: 'manual', hash: '',
+            body: { users: [] },
+            createdAt: new Date().toISOString(),
+            source: 'manual',
+            hash: '',
         });
 
         const app = createTestApp(config);
@@ -125,20 +129,30 @@ describe('DELETE /fixtures/:filename', () => {
     it('should delete an existing fixture', async () => {
         const config = makeConfig();
         const fixture: Fixture = {
-            method: 'GET', path: '/api/items', status: 200,
-            headers: {}, body: {}, createdAt: '', source: 'manual', hash: '',
+            method: 'GET',
+            path: '/api/items',
+            status: 200,
+            headers: {},
+            body: {},
+            createdAt: '',
+            source: 'manual',
+            hash: '',
         };
         const filename = saveFixture(tempDir, fixture);
 
         const app = createTestApp(config);
-        const res = await app.request(`/__mockcraft__/api/fixtures/${filename}`, { method: 'DELETE' });
+        const res = await app.request(`/__mockcraft__/api/fixtures/${filename}`, {
+            method: 'DELETE',
+        });
         const body = await res.json();
         expect(body.success).toBe(true);
     });
 
     it('should return 404 for non-existent fixture', async () => {
         const app = createTestApp(makeConfig());
-        const res = await app.request('/__mockcraft__/api/fixtures/nonexistent.json', { method: 'DELETE' });
+        const res = await app.request('/__mockcraft__/api/fixtures/nonexistent.json', {
+            method: 'DELETE',
+        });
         expect(res.status).toBe(404);
     });
 
@@ -155,10 +169,14 @@ describe('GET /fixtures/detail/*', () => {
     it('should return a fixture by filename', async () => {
         const config = makeConfig();
         const fixture: Fixture = {
-            method: 'GET', path: '/api/detail-test', status: 200,
+            method: 'GET',
+            path: '/api/detail-test',
+            status: 200,
             headers: { 'content-type': 'application/json' },
-            body: { detail: true }, createdAt: new Date().toISOString(),
-            source: 'manual', hash: '',
+            body: { detail: true },
+            createdAt: new Date().toISOString(),
+            source: 'manual',
+            hash: '',
         };
         const filename = saveFixture(tempDir, fixture);
 
@@ -198,7 +216,7 @@ describe('POST /ai/regenerate', () => {
         const res = await app.request('/__mockcraft__/api/ai/regenerate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ method: 'GET' }),  // missing path
+            body: JSON.stringify({ method: 'GET' }), // missing path
         });
         expect(res.status).toBe(400);
     });
@@ -214,7 +232,11 @@ describe('POST /ai/regenerate', () => {
     });
 
     it('should return 500 when AI provider is none', async () => {
-        const app = createTestApp(makeConfig({ ai: { provider: 'none', model: 'test', temperature: 0.7, maxTokens: 800 } }));
+        const app = createTestApp(
+            makeConfig({
+                ai: { provider: 'none', model: 'test', temperature: 0.7, maxTokens: 800 },
+            }),
+        );
         const res = await app.request('/__mockcraft__/api/ai/regenerate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -229,7 +251,13 @@ describe('POST /ai/regenerate', () => {
 describe('GET /ai/status', () => {
     it('should return AI provider info without API key', async () => {
         const config = makeConfig({
-            ai: { provider: 'grok', model: 'grok-beta', apiKey: 'secret', temperature: 0.7, maxTokens: 800 },
+            ai: {
+                provider: 'grok',
+                model: 'grok-beta',
+                apiKey: 'secret',
+                temperature: 0.7,
+                maxTokens: 800,
+            },
         });
         const app = createTestApp(config);
         const res = await app.request('/__mockcraft__/api/ai/status');

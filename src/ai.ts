@@ -5,12 +5,7 @@
  * All calls are rate-limited, timeout-protected, and SSRF-validated.
  */
 
-import {
-    validateUrl,
-    createRateLimiter,
-    safeLog,
-    safeError,
-} from './security.js';
+import { validateUrl, createRateLimiter, safeLog, safeError } from './security.js';
 import { saveFixture, type Fixture } from './fixtures.js';
 import type { MockcraftConfig } from './config.js';
 
@@ -77,7 +72,7 @@ Respond with a JSON object in this exact format:
  */
 async function callOllama(
     config: MockcraftConfig['ai'],
-    systemPrompt: string
+    systemPrompt: string,
 ): Promise<AIResponse> {
     const baseUrl = config.baseUrl || 'http://localhost:11434';
 
@@ -111,7 +106,7 @@ async function callOllama(
             throw new Error(`Ollama error: ${response.status} ${response.statusText}`);
         }
 
-        const data = await response.json() as { message?: { content?: string } };
+        const data = (await response.json()) as { message?: { content?: string } };
         const content = data.message?.content || '{}';
         return parseAIResponse(content, 'ollama', config.model || 'llama3.2');
     } finally {
@@ -122,10 +117,7 @@ async function callOllama(
 /**
  * Call Grok (xAI) via OpenAI-compatible API.
  */
-async function callGrok(
-    config: MockcraftConfig['ai'],
-    systemPrompt: string
-): Promise<AIResponse> {
+async function callGrok(config: MockcraftConfig['ai'], systemPrompt: string): Promise<AIResponse> {
     const baseUrl = config.baseUrl || 'https://api.x.ai';
 
     // SECURITY: SSRF — validate remote URL uses HTTPS
@@ -148,12 +140,15 @@ async function callGrok(
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`, // SECURITY: Key used transiently, not stored
+                Authorization: `Bearer ${apiKey}`, // SECURITY: Key used transiently, not stored
             },
             body: JSON.stringify({
                 model: config.model || 'grok-beta',
                 messages: [
-                    { role: 'system', content: 'You are a mock API server. Return only valid JSON.' },
+                    {
+                        role: 'system',
+                        content: 'You are a mock API server. Return only valid JSON.',
+                    },
                     { role: 'user', content: systemPrompt },
                 ],
                 temperature: config.temperature ?? 0.7,
@@ -166,7 +161,7 @@ async function callGrok(
             throw new Error(`Grok API error: ${response.status}`);
         }
 
-        const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
+        const data = (await response.json()) as { choices?: { message?: { content?: string } }[] };
         const content = data.choices?.[0]?.message?.content || '{}';
         return parseAIResponse(content, 'grok', config.model || 'grok-beta');
     } finally {
@@ -179,7 +174,7 @@ async function callGrok(
  */
 async function callClaude(
     config: MockcraftConfig['ai'],
-    systemPrompt: string
+    systemPrompt: string,
 ): Promise<AIResponse> {
     const baseUrl = config.baseUrl || 'https://api.anthropic.com';
 
@@ -219,7 +214,7 @@ async function callClaude(
             throw new Error(`Claude API error: ${response.status}`);
         }
 
-        const data = await response.json() as { content?: Array<{ text?: string }> };
+        const data = (await response.json()) as { content?: { text?: string }[] };
         const content = data.content?.[0]?.text || '{}';
         return parseAIResponse(content, 'claude', config.model || 'claude-3-5-sonnet-20241022');
     } finally {
@@ -289,12 +284,14 @@ function parseAIResponse(content: string, provider: string, model: string): AIRe
  */
 export async function generateMockResponse(
     config: MockcraftConfig,
-    ctx: AIRequestContext
+    ctx: AIRequestContext,
 ): Promise<AIResponse> {
     const aiConfig = config.ai;
 
     if (aiConfig.provider === 'none') {
-        throw new Error('AI provider is set to "none". Configure an AI provider in mockcraft.config.');
+        throw new Error(
+            'AI provider is set to "none". Configure an AI provider in mockcraft.config.',
+        );
     }
 
     // SECURITY: Rate limiting — 10 AI calls/min per endpoint
@@ -303,14 +300,16 @@ export async function generateMockResponse(
     if (!rateCheck.allowed) {
         throw new Error(
             `Rate limit exceeded for ${ctx.method} ${ctx.path}. ` +
-            `Try again in ${Math.ceil(rateCheck.resetIn / 1000)}s.`
+                `Try again in ${Math.ceil(rateCheck.resetIn / 1000)}s.`,
         );
     }
 
     const systemPrompt = buildSystemPrompt(ctx);
 
     // SECURITY: Log AI call without exposing secrets
-    safeLog(`[mockcraft] AI call → ${aiConfig.provider}/${aiConfig.model} for ${ctx.method} ${ctx.path}`);
+    safeLog(
+        `[mockcraft] AI call → ${aiConfig.provider}/${aiConfig.model} for ${ctx.method} ${ctx.path}`,
+    );
 
     let lastError: Error | undefined;
 
@@ -357,7 +356,7 @@ export async function generateMockResponse(
             lastError = err instanceof Error ? err : new Error(String(err));
             if (attempt === 0) {
                 safeLog(`[mockcraft] AI call failed (attempt 1), retrying...`);
-                await new Promise(r => setTimeout(r, 1000)); // 1s backoff
+                await new Promise((r) => setTimeout(r, 1000)); // 1s backoff
             }
         }
     }
